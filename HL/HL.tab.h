@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_EXP_TAB_H_INCLUDED
-# define YY_YY_EXP_TAB_H_INCLUDED
+#ifndef YY_YY_HL_TAB_H_INCLUDED
+# define YY_YY_HL_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -45,16 +45,35 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    INT = 258,
-    ID = 259,
-    LP = 260,
-    RP = 261,
-    PLUS = 262,
-    MINUS = 263,
-    STAR = 264,
-    DIV = 265,
-    ASSIGNOP = 266,
-    UMINUS = 267
+    END = 0,
+    CHAR = 258,
+    INT = 259,
+    FLOAT = 260,
+    BOOLTRUE = 261,
+    BOOLFALSE = 262,
+    IF = 263,
+    THEN = 264,
+    ELSE = 265,
+    WHILE = 266,
+    CONTINUE = 267,
+    BREAK = 268,
+    RETURN = 269,
+    ID = 270,
+    CHAR_CONST = 271,
+    INT_CONST = 272,
+    FLOAT_CONST = 273,
+    SELFADD = 274,
+    SELFSUB = 275,
+    GE = 276,
+    LE = 277,
+    EQUAL = 278,
+    NOTEQUAL = 279,
+    ADDASSIGN = 280,
+    SUBASSIGN = 281,
+    MULASSIGN = 282,
+    DIVSASSIGN = 283,
+    ERROR = 284,
+    ENDOFFILE = 285
   };
 #endif
 
@@ -63,13 +82,11 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 11 "exp.y" /* yacc.c:1909  */
+#line 15 "HL.y" /* yacc.c:1909  */
 
-	int type_int;
-	char type_id[32];
-	struct Exp *pExp;
+    Exp expression;
 
-#line 73 "exp.tab.h" /* yacc.c:1909  */
+#line 90 "HL.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -82,4 +99,4 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_EXP_TAB_H_INCLUDED  */
+#endif /* !YY_YY_HL_TAB_H_INCLUDED  */

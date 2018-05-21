@@ -1,5 +1,7 @@
 Terminals unused in grammar
 
+   LP
+   RP
    ASSIGNOP
 
 
@@ -7,7 +9,7 @@ Grammar
 
     0 $accept: input $end
 
-    1 input: /* empty */
+    1 input: %empty
     2      | input line
 
     3 line: '\n'
@@ -20,7 +22,7 @@ Grammar
     9    | exp MINUS exp
    10    | exp STAR exp
    11    | exp DIV exp
-   12    | LP exp RP
+   12    | '(' exp ')'
    13    | MINUS exp
 
 
@@ -28,11 +30,13 @@ Terminals, with rules where they appear
 
 $end (0) 0
 '\n' (10) 3 4 5
+'(' (40) 12
+')' (41) 12
 error (256) 5
 INT (258) 6
 ID (259) 7
-LP (260) 12
-RP (261) 12
+LP (260)
+RP (261)
 PLUS (262) 8
 MINUS (263) 9 13
 STAR (264) 10
@@ -43,17 +47,17 @@ UMINUS (267)
 
 Nonterminals, with rules where they appear
 
-$accept (14)
+$accept (16)
     on left: 0
-input (15)
+input (17)
     on left: 1 2, on right: 0 2
-line (16)
+line (18)
     on left: 3 4 5, on right: 2
-exp (17)
+exp (19)
     on left: 6 7 8 9 10 11 12 13, on right: 4 8 9 10 11 12 13
 
 
-state 0
+State 0
 
     0 $accept: . input $end
 
@@ -62,7 +66,7 @@ state 0
     input  go to state 1
 
 
-state 1
+State 1
 
     0 $accept: input . $end
     2 input: input . line
@@ -71,81 +75,81 @@ state 1
     error  shift, and go to state 3
     INT    shift, and go to state 4
     ID     shift, and go to state 5
-    LP     shift, and go to state 6
-    MINUS  shift, and go to state 7
-    '\n'   shift, and go to state 8
+    MINUS  shift, and go to state 6
+    '\n'   shift, and go to state 7
+    '('    shift, and go to state 8
 
     line  go to state 9
     exp   go to state 10
 
 
-state 2
+State 2
 
     0 $accept: input $end .
 
     $default  accept
 
 
-state 3
+State 3
 
     5 line: error . '\n'
 
     '\n'  shift, and go to state 11
 
 
-state 4
+State 4
 
     6 exp: INT .
 
     $default  reduce using rule 6 (exp)
 
 
-state 5
+State 5
 
     7 exp: ID .
 
     $default  reduce using rule 7 (exp)
 
 
-state 6
-
-   12 exp: LP . exp RP
-
-    INT    shift, and go to state 4
-    ID     shift, and go to state 5
-    LP     shift, and go to state 6
-    MINUS  shift, and go to state 7
-
-    exp  go to state 12
-
-
-state 7
+State 6
 
    13 exp: MINUS . exp
 
     INT    shift, and go to state 4
     ID     shift, and go to state 5
-    LP     shift, and go to state 6
-    MINUS  shift, and go to state 7
+    MINUS  shift, and go to state 6
+    '('    shift, and go to state 8
 
-    exp  go to state 13
+    exp  go to state 12
 
 
-state 8
+State 7
 
     3 line: '\n' .
 
     $default  reduce using rule 3 (line)
 
 
-state 9
+State 8
+
+   12 exp: '(' . exp ')'
+
+    INT    shift, and go to state 4
+    ID     shift, and go to state 5
+    MINUS  shift, and go to state 6
+    '('    shift, and go to state 8
+
+    exp  go to state 13
+
+
+State 9
 
     2 input: input line .
 
     $default  reduce using rule 2 (input)
 
 
-state 10
+State 10
 
     4 line: exp . '\n'
     8 exp: exp . PLUS exp
@@ -160,29 +164,14 @@ state 10
     '\n'   shift, and go to state 18
 
 
-state 11
+State 11
 
     5 line: error '\n' .
 
     $default  reduce using rule 5 (line)
 
 
-state 12
-
-    8 exp: exp . PLUS exp
-    9    | exp . MINUS exp
-   10    | exp . STAR exp
-   11    | exp . DIV exp
-   12    | LP exp . RP
-
-    RP     shift, and go to state 19
-    PLUS   shift, and go to state 14
-    MINUS  shift, and go to state 15
-    STAR   shift, and go to state 16
-    DIV    shift, and go to state 17
-
-
-state 13
+State 12
 
     8 exp: exp . PLUS exp
     9    | exp . MINUS exp
@@ -193,69 +182,84 @@ state 13
     $default  reduce using rule 13 (exp)
 
 
-state 14
+State 13
+
+    8 exp: exp . PLUS exp
+    9    | exp . MINUS exp
+   10    | exp . STAR exp
+   11    | exp . DIV exp
+   12    | '(' exp . ')'
+
+    PLUS   shift, and go to state 14
+    MINUS  shift, and go to state 15
+    STAR   shift, and go to state 16
+    DIV    shift, and go to state 17
+    ')'    shift, and go to state 19
+
+
+State 14
 
     8 exp: exp PLUS . exp
 
     INT    shift, and go to state 4
     ID     shift, and go to state 5
-    LP     shift, and go to state 6
-    MINUS  shift, and go to state 7
+    MINUS  shift, and go to state 6
+    '('    shift, and go to state 8
 
     exp  go to state 20
 
 
-state 15
+State 15
 
     9 exp: exp MINUS . exp
 
     INT    shift, and go to state 4
     ID     shift, and go to state 5
-    LP     shift, and go to state 6
-    MINUS  shift, and go to state 7
+    MINUS  shift, and go to state 6
+    '('    shift, and go to state 8
 
     exp  go to state 21
 
 
-state 16
+State 16
 
    10 exp: exp STAR . exp
 
     INT    shift, and go to state 4
     ID     shift, and go to state 5
-    LP     shift, and go to state 6
-    MINUS  shift, and go to state 7
+    MINUS  shift, and go to state 6
+    '('    shift, and go to state 8
 
     exp  go to state 22
 
 
-state 17
+State 17
 
    11 exp: exp DIV . exp
 
     INT    shift, and go to state 4
     ID     shift, and go to state 5
-    LP     shift, and go to state 6
-    MINUS  shift, and go to state 7
+    MINUS  shift, and go to state 6
+    '('    shift, and go to state 8
 
     exp  go to state 23
 
 
-state 18
+State 18
 
     4 line: exp '\n' .
 
     $default  reduce using rule 4 (line)
 
 
-state 19
+State 19
 
-   12 exp: LP exp RP .
+   12 exp: '(' exp ')' .
 
     $default  reduce using rule 12 (exp)
 
 
-state 20
+State 20
 
     8 exp: exp . PLUS exp
     8    | exp PLUS exp .
@@ -269,7 +273,7 @@ state 20
     $default  reduce using rule 8 (exp)
 
 
-state 21
+State 21
 
     8 exp: exp . PLUS exp
     9    | exp . MINUS exp
@@ -283,7 +287,7 @@ state 21
     $default  reduce using rule 9 (exp)
 
 
-state 22
+State 22
 
     8 exp: exp . PLUS exp
     9    | exp . MINUS exp
@@ -294,7 +298,7 @@ state 22
     $default  reduce using rule 10 (exp)
 
 
-state 23
+State 23
 
     8 exp: exp . PLUS exp
     9    | exp . MINUS exp

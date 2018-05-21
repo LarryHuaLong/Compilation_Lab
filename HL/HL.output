@@ -1,0 +1,137 @@
+Terminals unused in grammar
+
+   "char"
+   "int"
+   "float"
+   "true"
+   "false"
+   "if"
+   "then"
+   "else"
+   "while"
+   "continue"
+   "break"
+   "return"
+   ID
+   CHAR_CONST
+   INT_CONST
+   FLOAT_CONST
+   '('
+   ')'
+   '['
+   ']'
+   '*'
+   '/'
+   '%'
+   '+'
+   '-'
+   '>'
+   '<'
+   '='
+   "++"
+   "--"
+   ">="
+   "<="
+   "=="
+   "!="
+   "+="
+   "-="
+   "*="
+   "/="
+   ERROR
+   ENDOFFILE
+
+
+Rules useless in parser due to conflicts
+
+    2 program: %empty
+
+
+State 0 conflicts: 1 reduce/reduce
+
+
+Grammar
+
+    0 $accept: program "end of file"
+
+    1 program: %empty
+    2        | %empty
+
+
+Terminals, with rules where they appear
+
+"end of file" (0) 0
+'%' (37)
+'(' (40)
+')' (41)
+'*' (42)
+'+' (43)
+'-' (45)
+'/' (47)
+'<' (60)
+'=' (61)
+'>' (62)
+'[' (91)
+']' (93)
+error (256)
+"char" (258)
+"int" (259)
+"float" (260)
+"true" (261)
+"false" (262)
+"if" (263)
+"then" (264)
+"else" (265)
+"while" (266)
+"continue" (267)
+"break" (268)
+"return" (269)
+ID (270)
+CHAR_CONST (271)
+INT_CONST (272)
+FLOAT_CONST (273)
+"++" (274)
+"--" (275)
+">=" (276)
+"<=" (277)
+"==" (278)
+"!=" (279)
+"+=" (280)
+"-=" (281)
+"*=" (282)
+"/=" (283)
+ERROR (284)
+ENDOFFILE (285)
+
+
+Nonterminals, with rules where they appear
+
+$accept (43)
+    on left: 0
+program (44)
+    on left: 1 2, on right: 0
+
+
+State 0
+
+    0 $accept: . program "end of file"
+
+    "end of file"  reduce using rule 1 (program)
+    "end of file"  [reduce using rule 2 (program)]
+    $default       reduce using rule 1 (program)
+
+    program  go to state 1
+
+
+State 1
+
+    0 $accept: program . "end of file"
+
+    "end of file"  shift, and go to state 2
+
+
+State 2
+
+    0 $accept: program "end of file" .
+
+    $default  accept

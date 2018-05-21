@@ -2,21 +2,44 @@
 *       抽象语法树（AST）要用到的声明
 */
 
-typedef enum node_t
+typedef enum node_type
 {
-    ID_NODE,
-    INT_NODE,
-    LPRP_NODE,
-    PLUS_NODE,
-    MINUS_NODE,
-    STAR_NODE,
-    DIV_NODE,
-    UMINUS_NODE
-}node_t;
+	PROGRAM = 258,
+	CHAR,
+	INT,
+	FLOAT,
+	BOOLTRUE,
+	BOOLFALSE,
+	IF,
+	THEN,
+	ELSE,
+	WHILE,
+	CONTINUE,
+	BREAK,
+	RETURN,
+	SELFADD,
+	SELFSUB,
+	GE,
+	LE,
+	EQUAL,
+	NOTEQUAL,
+	ADDASSIGN,
+	SUBASSIGN,
+	MULASSIGN,
+	DIVSASSIGN,
+	SYMBOL,
+	CHAR_CONST,
+	INT_CONST,
+	FLOAT_CONST,
+	ID,
+	INVAILDID,
+	ERROR,
+	ENDOFFILE
+} node_type;
 
 typedef struct Exp
 {
-	node_t kind;
+	node_type kind;
 	union {
 		char type_id[33]; //由标识符生成的exp结点
 		int type_int;	 //由常数生成的exp结点
@@ -27,4 +50,3 @@ typedef struct Exp
 		} ptr; //有运算生成的exp结点
 	};
 } * PEXP;
-

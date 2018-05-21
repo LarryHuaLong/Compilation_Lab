@@ -39,7 +39,7 @@ exp	 : INT {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=INT_NODE;$$->type_int=
 	 | exp MINUS exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=MINUS_NODE;  $$->ptr.pExp1=$1;$$->ptr.pExp2=$3;}
 	 | exp STAR exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=STAR_NODE;  $$->ptr.pExp1=$1;$$->ptr.pExp2=$3;}
 	 | exp DIV exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=DIV_NODE;  $$->ptr.pExp1=$1;$$->ptr.pExp2=$3;}
-	 | LP exp RP   {$$=(PEXP)$2;}
+	 | '(' exp ')'   {$$=(PEXP)$2;}
      | MINUS exp   %prec UMINUS  {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=UMINUS_NODE;  $$->ptr.pExp1=$2;}  
 	;
 	/*以上exp的规则的语义动作生成抽象语法树*/

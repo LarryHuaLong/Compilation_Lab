@@ -1,366 +1,84 @@
-    /*
-    *  The scanner definition for HL (Homely Language).
-    */
-%option yylineno
 %{ 
-    //----- Declarations begin: 
-
-    #include <hl.h>
-    #include <string>
-
-    #define yylval 
-    #define yylex  
-
-    static int comment_layer = 0;
-
-    extern int curr_lineno;
-    extern int verbose_flag;
-    extern YYSTYPE cool_yylval;
-
-%}
-/* ----- Definitions begin: */
-
-DARROW          =>
-DIGIT           [0-9]
-%Start          COMMENTS
-%Start          INLINE_COMMENTS
-%Start          STRING
-
-/* ----- Definitions end. */
-
-/*
-
-#define CLASS 258
-#define ELSE 259
-#define FI 260
-#define IF 261
-#define IN 262
-#define INHERITS 263
-#define LET 264
-#define LOOP 265
-#define POOL 266
-#define THEN 267
-#define WHILE 268
-#define CASE 269
-#define ESAC 270
-#define OF 271
-#define DARROW 272
-#define NEW 273
-#define ISVOID 274
-#define STR_CONST 275
-#define INT_CONST 276
-#define BOOL_CONST 277
-#define TYPEID 278
-#define OBJECTID 279
-#define ASSIGN 280
-#define NOT 281
-#define LE 282
-#define ERROR 283
-#define LET_STMT 285
-
-*/
-
- /* ----- Rules begin: */
-%%
-
- /* Nested comments */
-<INITIAL,COMMENTS,INLINE_COMMENTS>"(*" {
-    comment_layer++;
-    BEGIN COMMENTS;
-}
-
-<COMMENTS>[^\n(*]* { }
-
-<COMMENTS>[()*] { }
-
-<COMMENTS>"*)" {
-    comment_layer--;
-    if (comment_layer == 0) {
-        BEGIN 0;
-    }
-}
-
-<COMMENTS><<EOF>> {
-    yylval.error_msg = "EOF in comment";
-    BEGIN 0;
-    return ERROR;
-}
-
-"*)" {
-    yylval.error_msg = "Unmatched *)";
-    return ERROR;
-}
-
-
- /* ===============
-  * inline comments
-  * ===============
-  */
-
- /* if seen "--", start inline comment */
-<INITIAL>"--" { BEGIN INLINE_COMMENTS; }
-
- /* any character other than '\n' is a nop in inline comments */ 
-<INLINE_COMMENTS>[^\n]* { }
-
- /* if seen '\n' in inline comment, the comment ends */
-<INLINE_COMMENTS>\n {
-    curr_lineno++;
-    BEGIN 0;
-}
-
- /* =========
-  * STR_CONST
-  * =========
-  * String constants (C syntax)
-  * Escape sequence \c is accepted for all characters c. Except for 
-  * \n \t \b \f, the result is c.
-  */
-
- /* if seen '\"', start string */
-<INITIAL>(\") {
-    BEGIN STRING;
-    yymore();
-}
-
- /* Cannot read '\\' '\"' '\n' */
-<STRING>[^\\\"\n]* { yymore(); }
-
- /* normal escape characters, not \n */
-<STRING>\\[^\n] { yymore(); }
-
- /* seen a '\\' at the end of a line, the string continues */
-<STRING>\\\n {
-    curr_lineno++;
-    yymore();
-}
-
- /* meet EOF in the middle of a string, error */
-<STRING><<EOF>> {
-    yylval.error_msg = "EOF in string constant";
-    BEGIN 0;
-    yyrestart(yyin);
-    return ERROR;
-}
-
- /* meet a '\n' in the middle of a string without a '\\', error */
-<STRING>\n {
-    yylval.error_msg = "Unterminated string constant";
-    BEGIN 0;
-    curr_lineno++;
-    return ERROR;
-}
-
- /* meet a "\\0" ??? */
-<STRING>\\0 {
-    yylval.error_msg = "Unterminated string constant";
-    BEGIN 0;
-    //curr_lineno++;
-    return ERROR;
-}
-
- /* string ends, we need to deal with some escape characters */
-<STRING>\" {
-    std::string input(yytext, yyleng);
-
-    // remove the '\"'s on both sizes.
-    input = input.substr(1, input.length() - 2);
-
-    std::string output = "";
-    std::string::size_type pos;
+    /******声明部分******/
+    #include "stdio.h"
+    #include "stdlib.h"
+    #include "HL.tab.h"  /* 由bison生成 */
+    //#include "AST.h"
+    /*
+    int yycolumn = 1;
+    #define YY_USER_ACTION \
+      yylloc.first_line = yylloc.last_line = yylineno; \
+      yylloc.first_column = yycolumn; \
+      yylloc.last_column = yycolumn + yyleng - 1; \
+      yycolumn += yyleng;
+    */
     
-    if (input.find_first_of('\0') != std::string::npos) {
-        yylval.error_msg = "String contains null character";
-        BEGIN 0;
-        return ERROR;    
-    }
+    #define LOG(TERMINAL) printf("(\"%s\", %s)\n", yytext,#TERMINAL);
 
-    while ((pos = input.find_first_of("\\")) != std::string::npos) {
-        output += input.substr(0, pos);
+%} 
+    /* 说明部分 */
+%option bison-bridge bison-locations debug
+%option yylineno stack 
 
-        switch (input[pos + 1]) {
-        case 'b':
-            output += "\b";
-            break;
-        case 't':
-            output += "\t";
-            break;
-        case 'n':
-            output += "\n";
-            break;
-        case 'f':
-            output += "\f";
-            break;
-        default:
-            output += input[pos + 1];
-            break;
-        }
+symbol        [{}()\[\]!~*/%+\-><&^|=,;]
+id            [A-Za-z_]+[A-Za-z0-9_]*
+invaild_id    [0-9][a-zA-Z0-9_]*
+char_const    \'(([\x00-\x7f])|(\\['\"?\\abfnrtv])|(\\x[0-9A-Fa-f]+))\'
+int_const     [+-]?(([1-9][0-9]*|0+)|(0[xX][0-9A-Fa-f]+)|(0[0-7]*))
+float_const   [+-]?[0-9]*\.?[0-9]+
+        int line_num = 1;
+%x COMMENTS 
+%%
+    /******规则部分******/
+[ \f\r\t\v]+        {}/* 处理空白符 */
 
-        input = input.substr(pos + 2, input.length() - 2);
-    }
-
-    output += input;
-
-    if (output.length() > 1024) {
-        yylval.error_msg = "String constant too long";
-        BEGIN 0;
-        return ERROR;    
-    }
-
-    cool_yylval.symbol = stringtable.add_string((char*)output.c_str());
-    BEGIN 0;
-    return STR_CONST;
-
-}
-
- /* ========
-  * keywords
-  * ========
-  */
-
- /* CLASS */
-(?i:class) { return CLASS; }
-
- /* ELSE */
-(?i:else) { return ELSE; }
-
- /* FI */
-(?i:fi) { return FI; }
-
- /* IF */
-(?i:if) { return IF; }
-
- /* IN*/
-(?i:in) { return IN; }
-
- /* INHERITS */
-(?i:inherits) { return INHERITS; }
-
- /* LET */
-(?i:let) { return LET; }
-
- /* LOOP */
-(?i:loop) { return LOOP; }
-
- /* POOL */
-(?i:pool) { return POOL; }
-
- /* THEN */
-(?i:then) { return THEN; }
-
- /* WHILE */
-(?i:while) { return WHILE; }
-
- /* CASE */
-(?i:case) { return CASE; }
-
- /* ESAC */
-(?i:esac) { return ESAC; }
-
- /* OF */
-(?i:of) { return OF; }
-
- /* NEW */
-(?i:new) { return NEW; }
-
- /* ISVOID */
-(?i:isvoid) { return ISVOID; }
-
- /* NOT */
-(?i:not) { return NOT; }
+"//".*          {printf("accepted a COMMENTLIME.\n");}/*识别单行注释*/
+"/*"                {printf("begin of COMMENTS.\n"); BEGIN(COMMENTS);}/*开始识别多行注释*/
+<COMMENTS>"*/"      {printf("begin of INITIAL.\n"); BEGIN(INITIAL);}
+<COMMENTS>([^*]|\n)+|.   {}/* eat anything that's not a '*' */
+<COMMENTS><<EOF>>   {printf("error:unclosed COMMENTS!");return ERROR;}
+    /* 关键字 */
+"char" { LOG(CHAR) return CHAR;}
+"int" { LOG(INT) return INT;}
+"float" { LOG(FLOAT) return FLOAT;}
+"true" { LOG(TRUE) return BOOLTRUE;}
+"false" { LOG(FALSE) return BOOLFALSE;}
+"if" { LOG(IF) return IF; }
+"then" { LOG(THEN) return THEN; }
+"else" { LOG(ELSE) return ELSE; }
+"while" { LOG(WHILE) return WHILE; }
+"continue" { LOG(CONTINUE) return CONTINUE; }
+"break" { LOG(BREAK) return BREAK; }
+"return" { LOG(RETURN) return RETURN;}
+    /* 符号 */
+"++" { LOG(SELFADD) return SELFADD;}
+"--" { LOG(SELFSUB) return SELFSUB;} 
+">=" { LOG(GE) return GE; }
+"<=" { LOG(LE) return LE; }
+"==" { LOG(EQUAL) return EQUAL;}
+"!=" { LOG(NOTEQUAL) return NOTEQUAL;}
+"+=" { LOG(ADDASSIGN) return ADDASSIGN; }
+"-=" { LOG(SUBASSIGN) return SUBASSIGN; }
+"*=" { LOG(MULASSIGN) return MULASSIGN; }
+"/=" { LOG(DIVSASSIGN) return DIVSASSIGN; }
+{symbol} { LOG(SYMBOL) return yytext[0];}
+{char_const} { LOG(CHAR_CONST) return CHAR_CONST;}/* 字符常量*/
+{int_const} { LOG(INT_CONST) return INT_CONST;}/* 整型常量 */
+{float_const} { LOG(FLOAT_CONST) return FLOAT_CONST;}/* 浮点数常量 */
+{id} { LOG(ID) return ID;}/* 标识符 */
+{invaild_id} { LOG(INVAILDID) printf("invailed id at line:%d\n",yylineno); return ERROR;}/* 标识符 */
 
 
- /* INT_CONST */
-{DIGIT}+ {
-    cool_yylval.symbol = inttable.add_string(yytext);
-    return INT_CONST;
-}
-
- /* BOOL_CONST */
-t(?i:rue) {
-    cool_yylval.boolean = 1;
-    return BOOL_CONST;
-}
-
-f(?i:alse) {
-    cool_yylval.boolean = 0;
-    return BOOL_CONST;
-}
-
- /* White Space */
-[ \f\r\t\v]+ { }
-
- /* TYPEID */
-[A-Z][A-Za-z0-9_]* {
-    cool_yylval.symbol = idtable.add_string(yytext);
-    return TYPEID;
-}
-
- /* To treat lines. */
-"\n" {
-    curr_lineno++;
-}
-
- /* OBJECTID */
-[a-z][A-Za-z0-9_]* {
-    cool_yylval.symbol = idtable.add_string(yytext);
-    return OBJECTID;
-}
-
- /* =========
-  * operators
-  * =========
-  */
-
- /* ASSIGN */
-"<-" { return ASSIGN; }
-
- /* LE */
-"<=" { return LE; }
-
- /* DARROW */
-"=>" { return DARROW; }
-
-"+" { return int('+'); }
-
-"-" { return int('-'); }
-
-"*" { return int('*'); }
-
-"/" { return int('/'); }
-
-"<" { return int('<'); }
-
-"=" { return int('='); }
-
-"." { return int('.'); }
-
-";" { return int(';'); }
-
-"~" { return int('~'); }
-
-"{" { return int('{'); }
-
-"}" { return int('}'); }
-
-"(" { return int('('); }
-
-")" { return int(')'); }
-
-":" { return int(':'); }
-
-"@" { return int('@'); }
-
-"," { return int(','); }
-
- /* =====
-  * error
-  * =====
-  */
-
-[^\n] {
-    yylval.error_msg = yytext;
-    return ERROR;
-}
+    /*error */
+. { LOG(ERROR) printf("error token at line:%d\n",yylineno); return ERROR;}
+<INITIAL><<EOF>> { LOG(ENDOFFILE) printf("end of file\n"); return ENDOFFILE;}
 
 %%
+/*void main()
+{
+    while(ENDOFFILE != yylex());
+    return ;
+}*/
+int yywrap(){
+    return 1;
+}
