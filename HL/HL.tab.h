@@ -45,35 +45,46 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    END = 0,
-    CHAR = 258,
-    INT = 259,
-    FLOAT = 260,
-    BOOLTRUE = 261,
-    BOOLFALSE = 262,
-    IF = 263,
-    THEN = 264,
+    NULL_0 = 258,
+    CHAR = 259,
+    INT = 260,
+    FLOAT = 261,
+    BOOLTRUE = 262,
+    BOOLFALSE = 263,
+    IF = 264,
     ELSE = 265,
     WHILE = 266,
     CONTINUE = 267,
     BREAK = 268,
     RETURN = 269,
-    ID = 270,
-    CHAR_CONST = 271,
-    INT_CONST = 272,
-    FLOAT_CONST = 273,
-    SELFADD = 274,
-    SELFSUB = 275,
-    GE = 276,
-    LE = 277,
-    EQUAL = 278,
-    NOTEQUAL = 279,
-    ADDASSIGN = 280,
-    SUBASSIGN = 281,
-    MULASSIGN = 282,
-    DIVSASSIGN = 283,
-    ERROR = 284,
-    ENDOFFILE = 285
+    READ = 270,
+    WRITE = 271,
+    ID = 272,
+    CHAR_CONST = 273,
+    STRING_CONST = 274,
+    INT_CONST = 275,
+    FLOAT_CONST = 276,
+    SELFADD = 277,
+    SELFSUB = 278,
+    SHIFTLEFT = 279,
+    SHIFTRIGHT = 280,
+    GE = 281,
+    LE = 282,
+    EQUAL = 283,
+    NOTEQUAL = 284,
+    LOGICALAND = 285,
+    LOGICALOR = 286,
+    ADDASSIGN = 287,
+    SUBASSIGN = 288,
+    MULASSIGN = 289,
+    DIVASSIGN = 290,
+    MODASSIGN = 291,
+    ANDASSIGN = 292,
+    XORASSIGN = 293,
+    ORASSIGN = 294,
+    SHIFTLEFTASSIGN = 295,
+    SHHIFTRIGHTASSIGN = 296,
+    UMINUS = 297
   };
 #endif
 
@@ -84,9 +95,14 @@ union YYSTYPE
 {
 #line 15 "HL.y" /* yacc.c:1909  */
 
-    Exp expression;
+    struct ASTnode *ast;
+    char type_id[33];  //由标识符生成的exp叶子结点
+    char type_char;	//由CHAR_CONST生成的exp叶子结点
+    int type_int;	  //由INT_CONST生成的exp叶子结点
+    float type_float;  //由FLOAT_CONST生成的exp叶子结点
+    char type_string[100]; //由STRING_CONST生成的exp叶子结点
 
-#line 90 "HL.tab.h" /* yacc.c:1909  */
+#line 106 "HL.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

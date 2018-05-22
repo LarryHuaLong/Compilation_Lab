@@ -1,12 +1,17 @@
-/*this is atest file*/   //comments 
-char test_char = 'a','\x34','\n';
+int main()
+{
+    /*this is atest file*/ //comments
+    char test_char = 'a';
     int test_int = 10;
- float test_float = 234.24;
- if true then {
-     while(false){         continue;
-        break;
-     }
- }
-00000_this_is_an_error_id
-return; //nsdf \
-@ $
+    float test_float = 234.24;
+    if (true)
+    {
+        while (false)
+        {
+            continue;
+            break;
+        }
+    }
+    
+    return 0; 
+}

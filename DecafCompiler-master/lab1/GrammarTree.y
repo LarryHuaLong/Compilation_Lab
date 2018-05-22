@@ -47,20 +47,20 @@
 
 %%
 Program: ClassDefs { 
-       $$ = CreateGrammarTree("Program", 1, $1); 
-       if (two_tuples_trigger)
-       {
-           printf("__________________________________________________\n\n");
-           printf("The two-tuples of \"Lexical Analyzing\" are printed!\n");
-           printf("__________________________________________________\n");
-       }
-       if (!gmerror) {
-           printf("\nNow print the grammar-tree of \"Grammar Analyzing\":\n");
-           printf("__________________________________________________\n\n"); 
-           TraverseGrammerTree($$, 0);
-           printf("__________________________________________________\n\n"); 
-           printf("The grammar-tree of \"Grammar Analyzing\" is printed!\n\n"); 
-       }
+            $$ = CreateGrammarTree("Program", 1, $1); 
+            if (two_tuples_trigger)
+            {
+                printf("__________________________________________________\n\n");
+                printf("The two-tuples of \"Lexical Analyzing\" are printed!\n");
+                printf("__________________________________________________\n");
+            }
+            if (!gmerror) {
+                printf("\nNow print the grammar-tree of \"Grammar Analyzing\":\n");
+                printf("__________________________________________________\n\n"); 
+                TraverseGrammerTree($$, 0);
+                printf("__________________________________________________\n\n"); 
+                printf("The grammar-tree of \"Grammar Analyzing\" is printed!\n\n"); 
+            }
        }
        ;
 
@@ -149,7 +149,7 @@ Call: IDENTIFIER OPLEFTPRNT Actuals OPRIGHTPRNT { $$ = CreateGrammarTree("Call",
 
 Actuals: { $$ = CreateGrammarTree("Actuals", 0, -1); }
        | Exprs { $$ = CreateGrammarTree("Actuals", 1, $1); }
-
+       ;
 Exprs: Expr { $$ = CreateGrammarTree("Exprs", 1, $1); }
      | Exprs SPCOMMA Expr { $$ = CreateGrammarTree("Exprs", 3, $1, $2, $3); }
      ;
