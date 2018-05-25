@@ -12,31 +12,30 @@
       yylloc.last_column = yycolumn + yyleng - 1; \
       yycolumn += yyleng;
     */
-    #define LOG(TERMINAL) printf("(\"%s\", %s)\n", yytext,#TERMINAL);
+    #define LOG(TERMINAL) //printf("(  %s  , %s)\n", yytext,#TERMINAL);
 
     extern YYSTYPE yylval;
     
 %} 
     /* 说明部分 */
-%option yylineno stack
+%option noyywrap nodefault yylineno stack
 
 symbol        [{}()\[\]!~*/%+\-><&^|=,;?:]
 id            [A-Za-z_]+[A-Za-z0-9_]*
 invaild_id    [0-9][a-zA-Z0-9_]*
-char_const    \'(([\x00-\x7f])|(\\['\"?\\abfnrtv])|(\\x[0-9A-Fa-f]+))\'
-string_const  \"([^\"\\\n]|(\\['\"?\\abfnrtv])|(\\([0123456]{1,3}))|(\\x[0-9A-Fa-f]+)|(\\u([0-9A-Fa-f]{4}))|(\\U([0-9A-Fa-f]{8})))*\"
+char_const    \'(([\x00-\x7f])|(\\[0'"\\abfnrtv]))\'
+string_const  \"(([\x00-\x7f])|(\\[0'"\\abfnrtv]))*\"
 int_const     [+-]?(([1-9][0-9]*|0+)|(0[xX][0-9A-Fa-f]+)|(0[0-7]*)|(0[bB][01]+))
 float_const   [+-]?(([0-9]+)|(([0-9]*[\.]([0-9]+))|(([0-9]+)[\.][0-9]*))[eE][+-]?([0-9]+))
 
-        int line_num = 1;
 %x COMMENTS 
 %%
     /******规则部分******/
-[ \f\r\t\v]+        {}/* 处理空白符 */
+[ \f\r\t\v\n]+        {}/* 处理空白符 */
 
-"//".*          {printf("accepted a COMMENTLIME.\n");}/*识别单行注释*/
-"/*"                {printf("begin of COMMENTS.\n"); BEGIN(COMMENTS);}/*开始识别多行注释*/
-<COMMENTS>"*/"      {printf("begin of INITIAL.\n"); BEGIN(INITIAL);}
+"//".*          {/*printf("accepted a COMMENTLIME.\n");*/}/*识别单行注释*/
+"/*"                {/*printf("begin of COMMENTS.\n"); */BEGIN(COMMENTS);}/*开始识别多行注释*/
+<COMMENTS>"*/"      {/*printf("begin of INITIAL.\n"); */BEGIN(INITIAL);}
 <COMMENTS>([^*]|\n)+|.   {}/* eat anything that's not a '*' */
 <COMMENTS><<EOF>>   {printf("error:unclosed COMMENTS!");}
     /* 关键字 */
@@ -77,7 +76,27 @@ float_const   [+-]?(([0-9]+)|(([0-9]*[\.]([0-9]+))|(([0-9]+)[\.][0-9]*))[eE][+-]
 "<<=" { LOG(SHIFTLEFTASSIGN) return SHIFTLEFTASSIGN; }
 ">>=" { LOG(SHHIFTRIGHTASSIGN) return SHHIFTRIGHTASSIGN; }
 {symbol} { LOG(SYMBOL) return yytext[0];}
-{char_const} { yylval.type_char = yytext[0]; LOG(CHAR_CONST) return CHAR_CONST;}/* 字符常量*/
+{char_const} {  if(yytext[1] == '\\'){
+                switch(yytext[2]){
+                    case 't': yylval.type_char = '\t'; break;
+                    case 'r': yylval.type_char = '\r'; break;
+                    case 'f': yylval.type_char = '\f'; break;
+                    case 'a': yylval.type_char = '\a'; break;
+                    case 'b': yylval.type_char = '\v'; break;
+                    case 'n': yylval.type_char = '\n'; break;
+                    case 'v': yylval.type_char = '\v'; break;
+                    case '\\': yylval.type_char = '\\'; break;
+                    case '\'': yylval.type_char = '\''; break;
+                    case '\"': yylval.type_char = '\"'; break;
+                    case '0': yylval.type_char = '\0'; break;
+                    default: yylval.type_char = '\0'; break;
+                }
+            }
+            else
+                yylval.type_char = yytext[1]; \
+            /*printf("\" %c \"\n",yylval.type_char);*/
+            LOG(CHAR_CONST) return CHAR_CONST;\
+        }
 {string_const} {strcpy(yylval.type_string, yytext); LOG(STRING_CONST) return STRING_CONST;}
 {int_const} { yylval.type_int = atoi(yytext); LOG(INT_CONST) return INT_CONST;}/* 整型常量 */
 {float_const} { yylval.type_float = atof(yytext); LOG(FLOAT_CONST)  return FLOAT_CONST;}/* 浮点数常量 */
@@ -87,14 +106,6 @@ float_const   [+-]?(([0-9]+)|(([0-9]*[\.]([0-9]+))|(([0-9]+)[\.][0-9]*))[eE][+-]
 
     /*error */
 . { printf("error token at line:%d\n",yylineno); LOG(ERROR) ;}
-<INITIAL><<EOF>> { printf("end of file\n"); LOG(ENDOFFILE) ;}
+    /*<INITIAL><<EOF>> { printf("end of file\n"); LOG(ENDOFFILE) return ENDOFFILE;}*/
 
 %%
-/*void main()
-{
-    while(ENDOFFILE != yylex());
-    return ;
-}*/
-int yywrap(){
-    return 1;
-}

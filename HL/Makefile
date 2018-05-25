@@ -1,13 +1,13 @@
 .PHONY: obj
 obj: parser
 
-lexer: HL.l AST.h HL.tab.h
+lexer: HL.flex AST.h HL.tab.h
 	bison -d -v HL.y
-	flex -f HL.l
+	flex  HL.flex
 	gcc -o lexer lex.yy.c
 
-parser: HL.l HL.y AST.h
-	flex HL.l
+parser: HL.flex HL.y AST.h
+	flex -f HL.flex
 	bison -d -v HL.y
 	gcc -g HL.tab.c -ly -o parser
 
