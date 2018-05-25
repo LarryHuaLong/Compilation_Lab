@@ -77,36 +77,43 @@ void displayAST(ASTnode *ast, int level)
     switch (ast->nodetype)
     {
     case 'D':
-        printf("%*cID: \"%s\"\n", level, ' ', ast->type_id);
+        printf("\033[31mID\033[0m: \"%s\"\n", ast->type_id);
         break;
     case 'C':
-        printf("%*cCHAR: \'%c\'\n", level, ' ', ast->type_char);
+        printf("\033[31mCHAR\033[0m: \'%c\'\n", ast->type_char);
         break;
     case 'I':
-        printf("%*cINT: %d\n", level, ' ', ast->type_int);
+        printf("\033[31mINT\033[0m: %d\n",  ast->type_int);
         break;
     case 'F':
-        printf("%*cFLOAT: %f\n", level, ' ', ast->type_float);
+        printf("\033[31mFLOAT\033[0m: %f\n",   ast->type_float);
         break;
     case 'S':
-        printf("%*cSTRING: \"%s\"\n", level, ' ', ast->type_string);
+        printf("\033[31mSTRING\033[0m: \"%s\"\n", ast->type_string);
         break;
     case 'E':
     case 'N':
-        printf("%*c%c: \"%s\"\n", level, ' ', ast->nodetype, ast->nodes.summary);
+        printf("\033[31m%c\033[0m: \"%s\"\n",  ast->nodetype, ast->nodes.summary);
         if (ast->nodes.node1)
         {
-
-            displayAST(ast->nodes.node1, level + 5);
+            for(int i = 0;i<level;i++)
+                printf("     ");
+            printf("`----");
+            displayAST(ast->nodes.node1, level + 1);
         }
         if (ast->nodes.node2)
         {
-
-            displayAST(ast->nodes.node2, level + 5);
+            for(int i = 0;i<level;i++)
+                printf("     ");
+            printf("`----");
+            displayAST(ast->nodes.node2, level + 1);
         }
         if (ast->nodes.node3)
         {
-            displayAST(ast->nodes.node3, level + 5);
+            for(int i = 0;i<level;i++)
+                printf("     ");
+            printf("`----");
+            displayAST(ast->nodes.node3, level + 1);
         }
         break;
     default:
@@ -117,7 +124,8 @@ void displayAST(ASTnode *ast, int level)
 
 /* delete and free an AST */
 void treefree(ASTnode *a)
-{
+{   
+    if(!a) return;
     if (a->nodetype == 'N')
     {
         if (a->nodes.node1)
@@ -127,8 +135,6 @@ void treefree(ASTnode *a)
         if (a->nodes.node3)
             treefree(a->nodes.node3);
     }
-    else if (a->nodetype == 'T')
+    else 
         free(a);
-    else
-        printf("error node!\n");
 }

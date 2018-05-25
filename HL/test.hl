@@ -12,10 +12,10 @@ int main()
     {
         if (test_char > test_int)
         {
-            test_int += (int) test_char;
+            test_int += (int)test_char;
             continue;
         }
         break;
     }
-    return 0; 
+    return 0;
 }

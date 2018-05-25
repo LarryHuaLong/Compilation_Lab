@@ -11,6 +11,8 @@ parser: HL.flex HL.y AST.h
 	bison -d -v HL.y
 	gcc -g HL.tab.c -ly -o parser
 
+test:
+	./parser test.hl
 .PHONY: clean
 clean:
 	-rm lex.yy.c lexer HL.output HL.tab.h HL.tab.c parser

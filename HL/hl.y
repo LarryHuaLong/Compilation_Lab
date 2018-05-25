@@ -90,7 +90,7 @@
 
 %start program
 %%
-program: INT ID '(' ')' '{' stmts '}' {ASTnode* temp = newAST('D', $2, NULL, NULL, NULL); $$=newAST('N', "program", temp, $6, NULL); displayAST($$,0);}
+program: INT ID '(' ')' '{' stmts '}' {ASTnode* temp = newAST('D', $2, NULL, NULL, NULL); $$=newAST('N', "program", temp, $6, NULL); displayAST($$,0);treefree($$);}
        | error                        {printf("error program\n");} 
        ;
 stmts:                                {$$=newAST('N', "empyt stmts", NULL, NULL, NULL);}

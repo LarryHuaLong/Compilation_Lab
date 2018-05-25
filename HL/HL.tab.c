@@ -1532,7 +1532,7 @@ yyreduce:
     {
         case 2:
 #line 93 "HL.y" /* yacc.c:1646  */
-    {ASTnode* temp = newAST('D', (yyvsp[-5].type_id), NULL, NULL, NULL); (yyval.ast)=newAST('N', "program", temp, (yyvsp[-1].ast), NULL); displayAST((yyval.ast),0);}
+    {ASTnode* temp = newAST('D', (yyvsp[-5].type_id), NULL, NULL, NULL); (yyval.ast)=newAST('N', "program", temp, (yyvsp[-1].ast), NULL); displayAST((yyval.ast),0);treefree((yyval.ast));}
 #line 1537 "HL.tab.c" /* yacc.c:1646  */
     break;
 
