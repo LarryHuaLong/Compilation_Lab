@@ -121,10 +121,10 @@ stmt:                                 {$$=newAST('N', "empyt stmt ;", NULL, NULL
     |WRITE '(' exp ',' exp ')' ';'    {$$=newAST('N', "write()", $3, $5, NULL);}
     |error ';'                        {$$=NULL; yyerror("error stmt at line %d\n",yylineno);}
     ;
-exp:'(' exp ')'                       {$$=newAST('E', "(exp)", $2, NULL, NULL);}    
-   |'(' INT ')' exp                   {$$=newAST('E', "(int)exp", $4, NULL, NULL);}
-   |'(' CHAR ')' exp                  {$$=newAST('E', "(char)exp", $4, NULL, NULL);}
-   |'(' FLOAT ')' exp                 {$$=newAST('E', "(float)exp", $4, NULL, NULL);}
+exp:'(' exp ')'                       {$$=newAST('N', "(exp)", $2, NULL, NULL);}    
+   |'(' INT ')' exp                   {$$=newAST('N', "(int)exp", $4, NULL, NULL);}
+   |'(' CHAR ')' exp                  {$$=newAST('N', "(char)exp", $4, NULL, NULL);}
+   |'(' FLOAT ')' exp                 {$$=newAST('N', "(float)exp", $4, NULL, NULL);}
    |CHAR_CONST                        {$$=newAST('C', &($1), NULL, NULL, NULL);}
    |STRING_CONST                      {$$=newAST('S', $1, NULL, NULL, NULL);}
    |INT_CONST                         {$$=newAST('I', &($1), NULL, NULL, NULL);}
