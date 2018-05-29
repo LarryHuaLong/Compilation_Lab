@@ -4,7 +4,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
-#include "ANSI_Escape_Codes.h"
 
 /*called for each parse error */
 extern void yyerror(char *s, ...);

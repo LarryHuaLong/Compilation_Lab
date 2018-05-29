@@ -3,7 +3,6 @@
     #include "stdio.h"
     #include "stdlib.h"
     #include "HL.tab.h"  /* 由bison生成 */
-    //#include "AST.h"
     /*
     int yycolumn = 1;
     #define YY_USER_ACTION \

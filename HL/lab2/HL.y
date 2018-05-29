@@ -64,9 +64,8 @@
 %token SHIFTLEFTASSIGN "<<="
 %token SHHIFTRIGHTASSIGN ">>="
 
-
 /* Precedence declarations go here. */
-%left ADDASSIGN SUBASSIGN MULASSIGN DIVASSIGN MODASSIGN ANDASSIGN XORASSIGN ORASSIGN SHIFTLEFTASSIGN SHHIFTRIGHTASSIGN
+%right '=' ADDASSIGN SUBASSIGN MULASSIGN DIVASSIGN MODASSIGN ANDASSIGN XORASSIGN ORASSIGN SHIFTLEFTASSIGN SHHIFTRIGHTASSIGN
 %right '?' ':'
 %left LOGICALOR
 %left LOGICALAND
@@ -80,38 +79,44 @@
 %left '*' '/' '%'
 %right '!' '~' UMINUS SELFADD SELFSUB
 %left '(' ')' '[' ']'
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+
 /* Declare types for the grammar's non-terminals. */
 %type <ast> program
+%type <ast> compst
+%type <ast> stmtlist
 %type <ast> stmt
-%type <ast> decl
-%type <ast> decls
-%type <ast> stmts
+%type <ast> def
+%type <ast> declist
+%type <ast> dec
 %type <ast> exp
 
 %start program
 %%
-program: INT ID '(' ')' '{' stmts '}' {ASTnode* temp = newAST('D', $2, NULL, NULL, NULL); $$=newAST('N', "program", temp, $6, NULL); displayAST($$,0);treefree($$);}
-       | error                        {printf("error program\n");} 
+program: INT ID '(' ')' compst        {ASTnode* temp = newAST('D', $2, NULL, NULL, NULL); $$=newAST('N', "program", temp, $5, NULL); displayAST($$,0);treefree($$);}
+       | error                        {printf("error program\n");}
        ;
-stmts:                                {$$=newAST('N', "empyt stmts", NULL, NULL, NULL);}
-     |decls stmts                     {$$=newAST('N', "decls stmts", $1, $2, NULL);}
-     |stmt stmts                      {$$=newAST('N', "stmt stmts", $1, $2, NULL);}
+compst:'{' stmtlist '}'               {$$=newAST('N', "stmtlist", $2, NULL, NULL);}
+      ;
+stmtlist:                             {$$=newAST('N', "empyt stmtlist", NULL, NULL, NULL);}
+     |stmt stmtlist                   {$$=newAST('N', "stmt stmts", $1, $2, NULL);}
      ;
-decls:                                {$$=newAST('N', "empyt decls", NULL, NULL, NULL);}  
-     |decl decls                      {$$=newAST('N', "decl decls", $1, $2, NULL);}
-     ;
-decl:CHAR ID ';'                      {ASTnode* temp=newAST('D', $2, NULL, NULL, NULL);$$=newAST('N', "char ID ;",temp, NULL, NULL);}
-    |CHAR ID '=' exp ';'              {ASTnode* temp=newAST('D', $2, NULL, NULL, NULL);$$=newAST('N', "char ID = exp ;",temp, $4, NULL);}
-    |INT ID ';'                       {ASTnode* temp=newAST('D', $2, NULL, NULL, NULL);$$=newAST('N', "int ID ;", temp, NULL, NULL);} 
-    |INT ID '=' exp ';'               {ASTnode* temp=newAST('D', $2, NULL, NULL, NULL);$$=newAST('N', "int ID = exp ;",temp, $4, NULL);}
-    |FLOAT ID ';'                     {ASTnode* temp=newAST('D', $2, NULL, NULL, NULL);$$=newAST('N', "float ID ;", temp, NULL, NULL);}                 
-    |FLOAT ID '=' exp ';'             {ASTnode* temp=newAST('D', $2, NULL, NULL, NULL);$$=newAST('N', "float ID = exp ;",temp, $4, NULL);}
-    ;
-stmt:                                 {$$=newAST('N', "empyt stmt ;", NULL, NULL, NULL);}  
+def:CHAR declist                      {$$=newAST('N', "CHAR declist", $2, NULL, NULL);}
+   |INT declist                       {$$=newAST('N', "INT declist", $2, NULL, NULL);}
+   |FLOAT declist                     {$$=newAST('N', "FLOAT declist", $2, NULL, NULL);}
+   ;
+declist:dec                           {$$=newAST('N', "dec", $1, NULL, NULL);}
+       |dec ',' declist               {$$=newAST('N', "dec , declist", $1, $3, NULL);}
+       ;
+dec:ID                                {ASTnode* temp = newAST('D', $1, NULL, NULL, NULL);$$=newAST('I', "ID", temp,NULL, NULL);}
+   |ID '=' exp                        {ASTnode* temp = newAST('D', $1, NULL, NULL, NULL);$$=newAST('N', "ID = exp", temp, $3, NULL);}
+   ;
+stmt:def ';'                          {$$=newAST('N', "def stmt;", $1, NULL, NULL);}
     |';'                              {$$=newAST('N', "empyt stmt ;", NULL, NULL, NULL);}
-    |'{' stmts '}'                    {$$=newAST('N', "{ stmts }", $2, NULL, NULL);}
+    |compst                           {$$=newAST('N', "{ stmts }", $1, NULL, NULL);}
     |exp ';'                          {$$=newAST('N', "exp ;", $1, NULL, NULL);}
-    |IF '(' exp ')' stmt              {$$=newAST('N', "if ;", $3, $5, NULL);}
+    |IF '(' exp ')' stmt %prec LOWER_THAN_ELSE   {$$=newAST('N', "if ;", $3, $5, NULL);}
     |IF '(' exp ')' stmt ELSE stmt    {$$=newAST('N', "if-else ;", $3, $5, $7);}
     |WHILE '(' exp ')' stmt           {$$=newAST('N', "while ;", $3, $5, NULL);}
     |CONTINUE ';'                     {$$=newAST('N', "continue ;", NULL, NULL, NULL);}
@@ -121,10 +126,10 @@ stmt:                                 {$$=newAST('N', "empyt stmt ;", NULL, NULL
     |WRITE '(' exp ',' exp ')' ';'    {$$=newAST('N', "write()", $3, $5, NULL);}
     |error ';'                        {$$=NULL; yyerror("error stmt at line %d\n",yylineno);}
     ;
-exp:'(' exp ')'                       {$$=newAST('E', "(exp)", $2, NULL, NULL);}    
-   |'(' INT ')' exp                   {$$=newAST('E', "(int)exp", $4, NULL, NULL);}
-   |'(' CHAR ')' exp                  {$$=newAST('E', "(char)exp", $4, NULL, NULL);}
-   |'(' FLOAT ')' exp                 {$$=newAST('E', "(float)exp", $4, NULL, NULL);}
+exp:'(' exp ')'                       {$$=newAST('N', "(exp)", $2, NULL, NULL);}    
+   |'(' INT ')' exp                   {$$=newAST('N', "(int)exp", $4, NULL, NULL);}
+   |'(' CHAR ')' exp                  {$$=newAST('N', "(char)exp", $4, NULL, NULL);}
+   |'(' FLOAT ')' exp                 {$$=newAST('N', "(float)exp", $4, NULL, NULL);}
    |CHAR_CONST                        {$$=newAST('C', &($1), NULL, NULL, NULL);}
    |STRING_CONST                      {$$=newAST('S', $1, NULL, NULL, NULL);}
    |INT_CONST                         {$$=newAST('I', &($1), NULL, NULL, NULL);}
@@ -133,7 +138,7 @@ exp:'(' exp ')'                       {$$=newAST('E', "(exp)", $2, NULL, NULL);}
    |BOOLFALSE                         {$$=newAST('I', &($1), NULL, NULL, NULL);}
    |NULL_0                            {$$=newAST('I', &($1), NULL, NULL, NULL);}
    |ID                                {$$=newAST('D', $1, NULL, NULL, NULL);}
-   |ID '[' exp ']'                    {ASTnode* temp = newAST('D', $1, NULL, NULL, NULL); $$=newAST('N', "array", temp, $3, NULL);}
+   |exp '[' exp ']'                   {$$=newAST('N', "array", $1, $3, NULL);}
    |'!' exp                           {$$=newAST('E', "! exp", $2, NULL, NULL);}
    |'~' exp                           {$$=newAST('E', "~ exp", $2, NULL, NULL);}
    |'-' exp %prec UMINUS              {$$=newAST('E', "- exp", $2, NULL, NULL);}

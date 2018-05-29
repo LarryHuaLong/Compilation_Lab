@@ -1,17 +1,14 @@
-int main()
-{
-    /*this is atest file*/ //comments
-    char test_char = 'a';
-    //float test_float = 234.24;
-    while (true)
-    {
-        int test_int = 10;
-        if (test_char > test_int)
-        {
-            test_int += (int)test_char;
-            continue;
-        }
-        break;
-    }
-    return 0;
+int main(){
+    int a;
+    //sdfsdfsfs
+    /*fsdf
+    sdfsd*/
+    a = -a * 3;
+    if(1>2)
+        if(2>3)
+            1;
+        else
+            2;
+    else
+        2;
 }
